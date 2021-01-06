@@ -277,6 +277,7 @@ ggplot(transit_cost, aes(stations)) +
 ```
 
 ![](week02_files/figure-html/station-hist-1.png)<!-- -->
+
 Something interesting to check is whether the stations are somewhat evenly distributed across the length of the project.
 
 
@@ -290,6 +291,7 @@ ggplot(transit_cost, aes(stations/length)) +
 ```
 
 ![](week02_files/figure-html/station-length-hist-1.png)<!-- -->
+
 Interestingly, urban rails that are very long, also keep the `stations/length` ratio around the mean.
 
 
