@@ -1,6 +1,6 @@
+library(tidyverse)
 tuesdata <- tidytuesdayR::tt_load(2021, week = 2)
 transit_cost <- tuesdata$transit_cost
-library(tidyverse)
 
 
 # clean -------------------------------------------------------------------

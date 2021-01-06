@@ -1,0 +1,197 @@
+---
+title: "Week 02"
+author: "Matias Andina"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    code_folding: hide
+    keep_md: true
+---
+
+```{r setup, include=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+theme_set(theme_bw())
+```
+
+Let's load the data for this week:
+
+```{r load-data , message=FALSE, warning=FALSE}
+tuesdata <- tidytuesdayR::tt_load(2021, week = 2)
+transit_cost <- tuesdata$transit_cost
+```
+
+Let's take a look at the data:
+
+```{r mini-inspect}
+head(transit_cost)
+```
+
+Let's perform some inspection of the values
+
+```{r inspection, message=FALSE, warning=FALSE}
+psych::describe(transit_cost)
+```
+
+Check if we have `NA`s and where.
+
+```{r mo-inspection}
+transit_cost %>% is.na() %>% colSums() %>% enframe(value = "NA_count")
+```
+
+### Outlier inspection
+
+Quick check for extreme values
+
+```{r length, message=FALSE, warning=FALSE}
+cowplot::plot_grid(
+ggplot(transit_cost, aes(length)) +
+  geom_histogram(),
+ggplot(filter(transit_cost, length<5000),
+       aes(length)) +
+  geom_histogram(color="black")
+)
+```
+
+Remove outliers in `length`
+
+```{r remove-length}
+transit_cost <- filter(transit_cost, length < 5000)
+
+```
+
+### Cleaning year variables
+
+The variables `start_year` and `end year` are not a `double` and are contaminated. We can also make a `duration` variable, so that we account for the duration of the project. The ones with `4 years` will be counted as `duration`.
+
+```{r inspect-years}
+unique(transit_cost$start_year)
+unique(transit_cost$end_year)
+unique(transit_cost$year)
+```
+
+```{r clean-years, message=FALSE, warning=FALSE}
+transit_cost <- transit_cost %>% 
+  # duration and cleaning of years
+  # NAs by coercion
+  mutate(duration = ifelse(str_detect(start_year, "years"),
+                           parse_number(start_year),
+                           as.numeric(end_year) - as.numeric(start_year)),
+         start_year = as.numeric(start_year),
+         end_year = as.numeric(end_year))
+```
+
+Let's inspect the new `duration` variable:
+
+```{r duration-hist, message=FALSE, warning=FALSE}
+transit_cost %>% 
+  ggplot(aes(duration))+
+  geom_bar(color="black")
+```
+
+It looks like it takes 5 years to finish a urban rail project. It's also independent of the `length`, which is super interesting!
+
+```{r duration-hist-fill, message=FALSE, warning=FALSE}
+transit_cost %>% 
+  mutate(cutt = cut(length, seq(0, 200, 40))) %>% 
+  #filter(!is.na(duration)) %>%
+  group_by(duration, cutt) %>% 
+  count() %>% 
+  ggplot(aes(duration, y=n, fill=cutt)) +
+  geom_col() +
+  labs(title="It takes roughly 5 years to complete a urban rail",
+       fill="Project length (Km)",
+       x="Project Duration (years)", y="Count",
+       caption="Source: Global Transit Costs | Viz: @NeuroMLA") +
+  ggthemes::theme_clean()+ 
+  scale_fill_brewer(palette = "Set1")+
+  theme(legend.position="bottom")
+```
+
+```{r, warning=FALSE}
+ggplot(transit_cost,
+       aes(length, cost_km_millions)) +
+  geom_point() +
+  ggrepel::geom_text_repel(data = filter(transit_cost, cost_km_millions > 1000), 
+            aes(length, cost_km_millions, label=city),
+            direction="x", 
+            segment.color = "black") +
+  ggrepel::geom_text_repel(data = filter(transit_cost, length > 100), 
+                           aes(length, cost_km_millions, label=city),
+                           direction="y", 
+                           segment.color = "black")+
+  labs(title="Urban rails of the World: Paris beats NYC",
+       x="Length (Km)",
+       y="Cost per Km in millions",
+       caption="Source: Global Transit Costs | Viz: @NeuroMLA")
+
+```
+
+### Stations
+
+Inspection the number of stations
+
+```{r station-hist, warning=FALSE, message=FALSE}
+ggplot(transit_cost, aes(stations)) +
+  geom_histogram(color="black")
+```
+Something interesting to check is whether the stations are somewhat evenly distributed across the length of the project.
+
+```{r station-length-hist, warning=FALSE, message=FALSE}
+ggplot(transit_cost, aes(stations/length)) +
+  geom_histogram(color="black", binwidth = 0.1) +
+  geom_density(aes(y = ..density..*(nrow(transit_cost) * 0.1)))+
+  labs(
+    title = "Station distribution across urban rails in the world",
+    subtitle=glue::glue("Average of {round(mean(transit_cost$stations/transit_cost$length, na.rm=T), 2)} stations per km"))
+```
+Interestingly, urban rails that are very long, also keep the `stations/length` ratio around the mean.
+
+```{r stations-length-long, warning=FALSE}
+ggplot(transit_cost, aes(stations/length, length)) +
+  geom_point()
+```
+
+
+Since I saw this dataset contained `start_year` and `end_year` I was dying to make this plot. Wish fulfilled!
+
+```{r}
+transit_cost %>% 
+  select(city, start_year, end_year, line) %>% 
+  mutate(line = factor(paste(city, line)),
+         line = fct_reorder(line, desc(end_year))) %>% 
+  filter(complete.cases(.)) %>% 
+  ggplot(aes(y=line)) + 
+  geom_segment(aes(x=start_year, xend=end_year, yend=line, color = line))+
+  theme(legend.position="none",
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())+
+  labs(title = "Project urban rail: Duration around the World",
+       subtitle = "Each segment represents one urban rail line construction period (start to end years)",
+       x = "Year",
+       y = "urban rail line",
+       caption = "Source: Global Transit Costs | Viz: @NeuroMLA")+
+  theme(panel.background = element_rect(fill="gray90"),
+        panel.grid = element_blank(), panel.grid.major.x = element_line(color="gray50",linetype = 2))+
+  #scale_color_viridis_d(option = "D")+
+  NULL
+```
+
+Seeing how a chunk of lines get completed at the same time, I got superstitious and decided to check whether projects start or end on even/odd years. It looks like if you are going to dig, you are more likely to choose an even year, and you will finish an an odd year 🤔
+
+```{r}
+transit_cost %>% 
+  count(start = start_year %% 2,
+        end = end_year %% 2) %>%
+  mutate_at(vars(c("start", "end")),
+            ~ifelse(. == 0, "even", "odd")) %>% 
+  filter(complete.cases(.)) %>% 
+  ggplot()+
+  geom_point(aes(start, end, size =n ,color=n))+
+  labs(title = "There's something odd going on",
+       subtitle = "Most urban rails start on odd years and finish on even years",
+       x = "Project start year",
+       y = "Project end year",
+       caption = "Source: Global Transit Costs | Viz: @NeuroMLA")+
+  theme(legend.position = "bottom")
+
+```
