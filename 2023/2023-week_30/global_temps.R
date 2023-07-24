@@ -78,6 +78,7 @@ mean_temps %>%
                  color = id), size=5) +
   paletteer::scale_color_paletteer_d("basetheme::clean") +
   ggthemes::theme_fivethirtyeight(base_size = 16) +
+  scale_y_continuous(labels = scales::label_number(suffix = "°C")) +
   labs(y = "Mean Global Temperature (C)",
        x = element_blank(),
        title = "Generational Warming",
