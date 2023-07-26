@@ -32,7 +32,7 @@ script_text <- paste0(
   'library(tidytuesdayR)',
   '\n\n',
   'gg_record(dir = "tidytuesday-temp", device = "png", width = 10, height = 8, units = "in", dpi = 320)',
-  '\n\n',
+  '\n\n'
 )
 
 script_text <- paste(
