@@ -44,6 +44,6 @@ script_text <- paste(
 write(as.character(script_text), file(script_file))
 
 # Open script and start having fun!
-#file.edit(script_file)
+file.edit(script_file)
 
 closeAllConnections()
