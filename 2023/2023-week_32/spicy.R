@@ -36,13 +36,23 @@ df$sauces %>%
 df$sauces %>% 
   ggplot(aes(factor(sauce_number), season,fill=log10(scoville))) +
   geom_tile() +
+  scale_y_continuous(expand = expansion(0, 0)) +
+  scale_x_discrete(expand = expansion(0, 0)) +
   paletteer::scale_fill_paletteer_c("pals::kovesi.linear_kryw_5_100_c67", 
                                     direction = -1) +
-  coord_fixed(ratio = 1/2) +
-  theme(legend.position = "bottom")+
+  coord_fixed(ratio = 1/5) +
+  theme(
+    text = element_text(size = 16, family = "Ubuntu"),
+    legend.position = "bottom",
+    plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5),
+    panel.background = element_blank(),
+    axis.ticks = element_blank())+
   labs(y = "Season", 
        x = "Sauce Number",
-       title = "🌶️i")
+       fill = "Scoville Rating (log)",
+       title = "🌶 Bring on the Heat",
+       subtitle = "Scoville ratings for the sauces on each season of `Hot Ones`")
 
 
 df$sauces %>%

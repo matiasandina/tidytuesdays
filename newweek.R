@@ -29,7 +29,8 @@ file.create(script_file)
 script_text <- paste0(
   'library(tidyverse)', '\n',
   'library(camcorder)', '\n', 
-  'library(tidytuesdayR)',
+  'library(tidytuesdayR)','\n',
+  'library(paletteer)',
   '\n\n',
   'gg_record(dir = "tidytuesday-temp", device = "png", width = 10, height = 8, units = "in", dpi = 320)',
   '\n\n'
