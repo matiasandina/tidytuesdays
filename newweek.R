@@ -26,21 +26,10 @@ write(as.character(readme_text), file(readme))
 # Create script file
 script_file <- paste0(folder, "/", newscript, ".R")
 file.create(script_file)
-script_text <- paste0(
-  'library(tidyverse)', '\n',
-  'library(camcorder)', '\n', 
-  'library(tidytuesdayR)','\n',
-  'library(paletteer)',
-  '\n\n',
-  'gg_record(dir = "tidytuesday-temp", device = "png", width = 10, height = 8, units = "in", dpi = 320)',
-  '\n\n'
-)
-
-script_text <- paste(
-  script_text,
-  glue::glue('df <- tt_load({which_year}, week={which_week})'), 
-  sep="\n"
-)
+r_txt <- readLines("template.R")
+r_txt <- stringr::str_replace(r_txt, 
+                     pattern = "date_chr",
+                     replacement = glue::glue("{which_year}, week = {which_week}"))
 
 write(as.character(script_text), file(script_file))
 

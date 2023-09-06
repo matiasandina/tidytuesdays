@@ -7,5 +7,5 @@ make_caption <- function(accent, bg, data) {
   #threads <- glue::glue("<span style='font-family:fa-brands; color:{accent}'>&#xe618;</span>")
   space <- glue::glue("<span style='color:{bg};font-size:1px'>'</span>")
   space2 <- glue::glue("<span style='color:{bg}'>-</span>") 
-  glue::glue("{twitter} {space2} @NeuroMLA {space2} {github} {space2} matiasandina/tidytuesdays {space2}{space2} {floppy}{space2} {data}")
+  glue::glue("{twitter}{space2}@NeuroMLA{space2}{github}{space2}matiasandina/tidytuesdays{space2}{space2}{floppy}{space2}{data}")
 }
