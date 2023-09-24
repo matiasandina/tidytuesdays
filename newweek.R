@@ -31,7 +31,7 @@ r_txt <- stringr::str_replace(r_txt,
                      pattern = "date_chr",
                      replacement = glue::glue("{which_year}, week = {which_week}"))
 
-write(as.character(script_text), file(script_file))
+write(as.character(r_txt), file(script_file))
 
 # Open script and start having fun!
 file.edit(script_file)
