@@ -34,6 +34,6 @@ r_txt <- stringr::str_replace(r_txt,
 write(as.character(r_txt), file(script_file))
 
 # Open script and start having fun!
-setwd(dirname(script_file))
 file.edit(script_file)
+setwd(dirname(script_file))
 closeAllConnections()
